@@ -37,7 +37,7 @@ export default function EditorArea({
 
   /* ---------- Status logic ---------- */
   const hasText = text.trim().length > 0
-  const isInclusive = hasText && issues.length === 0
+  const isInclusive = issues.length === 0
   const hasIssues = issues.length > 0
 
   return (
