@@ -45,7 +45,7 @@ function fallbackIssuesFromText(text) {
   const fallbackRules = [
     // ===== GENDERED PRONOUNS =====
     { regex: /\bhis\b/gi, label: "Gendered pronoun", suggestion: "their", severity: "medium", bias: "Gender Bias" },
-    { regex: /\bher\b(?=\s+(?:name|work|job|report|idea|team|plan|opinion))/gi, label: "Gendered pronoun (possessive)", suggestion: "their", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bher\b/gi, label: "Gendered pronoun", suggestion: "their", severity: "medium", bias: "Gender Bias" },
     { regex: /\bhim\b/gi, label: "Gendered pronoun", suggestion: "them", severity: "medium", bias: "Gender Bias" },
     { regex: /\bhe\b/gi, label: "Gendered pronoun", suggestion: "they", severity: "medium", bias: "Gender Bias" },
     { regex: /\bshe\b/gi, label: "Gendered pronoun", suggestion: "they", severity: "medium", bias: "Gender Bias" },
@@ -82,10 +82,10 @@ function fallbackIssuesFromText(text) {
     { regex: /\bmanpower\b/gi, label: "Gendered terminology", suggestion: "workforce", severity: "high", bias: "Gender Bias" },
     { regex: /\bmankind\b/gi, label: "Gendered terminology", suggestion: "humanity", severity: "high", bias: "Gender Bias" },
     { regex: /\bman-made\b/gi, label: "Gendered terminology", suggestion: "human-made", severity: "high", bias: "Gender Bias" },
-    { regex: /\bguys\b/gi, label: "Gendered group reference", suggestion: "everyone", severity: "medium", bias: "Gender Bias" },
-    { regex: /\bgirls\b/gi, label: "Gendered group reference", suggestion: "people", severity: "medium", bias: "Gender Bias" },
-    { regex: /\bboys\b/gi, label: "Gendered group reference", suggestion: "people", severity: "medium", bias: "Gender Bias" },
-    { regex: /\blads\b/gi, label: "Gendered group reference", suggestion: "people", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bguys?\b/gi, label: "Gendered group reference", suggestion: "everyone/people/candidates", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bgirls?\b/gi, label: "Gendered group reference", suggestion: "people/women", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bboys?\b/gi, label: "Gendered group reference", suggestion: "people/men", severity: "medium", bias: "Gender Bias" },
+    { regex: /\blads?\b/gi, label: "Gendered group reference", suggestion: "people", severity: "medium", bias: "Gender Bias" },
     { regex: /\bwomankind\b/gi, label: "Gendered terminology", suggestion: "humanity", severity: "high", bias: "Gender Bias" },
     
     // ===== ABLEIST LANGUAGE =====
@@ -106,6 +106,14 @@ function fallbackIssuesFromText(text) {
     { regex: /\b(?:elderly|seniors?|golden years?)\b/gi, label: "Age stereotyping", suggestion: "older adults or specific age", severity: "medium", bias: "Age Bias" },
     { regex: /\byoung\s+(?:person|people|woman|man)\b/gi, label: "Age bias - vague term", suggestion: "younger adults or specific age", severity: "medium", bias: "Age Bias" },
     { regex: /\bgeneration\s+(?:x|y|z|millennial|boomer)\b/gi, label: "Generational stereotyping", suggestion: "people born in [specific years]", severity: "medium", bias: "Age Bias" },
+    { regex: /\bfreshers?\b/gi, label: "Age/experience discrimination", suggestion: "early-career professionals or entry-level candidates", severity: "high", bias: "Age Bias" },
+    { regex: /\bexperienced\s+professional\b/gi, label: "Age bias - indirect", suggestion: "professional with [X years] experience", severity: "medium", bias: "Age Bias" },
+    
+    // ===== MARITAL/PERSONAL STATUS DISCRIMINATION =====
+    { regex: /\bunmarried\b/gi, label: "Marital status discrimination", suggestion: "available/flexible", severity: "high", bias: "Tone" },
+    { regex: /\b(?:married|single|divorced)\s+(?:women?|men?|candidates?|personnel|employees?)\b/gi, label: "Inappropriate personal criteria", suggestion: "remove marital status requirement", severity: "high", bias: "Tone" },
+    { regex: /\bwith(?:out)?\s+(?:children?|kids?)\b/gi, label: "Family status discrimination", suggestion: "remove family status requirement", severity: "high", bias: "Tone" },
+    { regex: /\bonly\s+(?:unmarried|single|childless)/gi, label: "Marital status discrimination", suggestion: "remove personal status requirement", severity: "high", bias: "Tone" },
     
     // ===== CULTURAL/RELIGIOUS BIAS =====
     { regex: /\bforeign\s+(?:workers?|nationals?)\b/gi, label: "Othering language", suggestion: "international workers/workers from [country]", severity: "medium", bias: "Cultural Bias" },
@@ -118,14 +126,22 @@ function fallbackIssuesFromText(text) {
     // ===== TONE/RESPECTFULNESS =====
     { regex: /\bbeast\b/gi, label: "Dehumanizing language", suggestion: "hardworking or dedicated person", severity: "medium", bias: "Tone" },
     { regex: /\bgangsta?\b/gi, label: "Stereotyping slang", suggestion: "use professional terminology", severity: "medium", bias: "Tone" },
-    { regex: /\bhhh|lolll?|smh\b/gi, label: "Unprofessional tone", suggestion: "use professional language", severity: "low", bias: "Tone" },
+    { regex: /\baggressive\b/gi, label: "Trait-based discrimination (may favor certain genders)", suggestion: "specify required job competencies", severity: "medium", bias: "Tone" },
+    { regex: /\bcompetitive\b/gi, label: "Trait-based discrimination (may favor certain genders)", suggestion: "specify required job competencies", severity: "medium", bias: "Tone" },
+    { regex: /\bdominant\b/gi, label: "Trait-based discrimination (may favor certain genders)", suggestion: "specify required job competencies", severity: "medium", bias: "Tone" },
+    { regex: /\b(?:warm|nurturing|caring|motherly)\b/gi, label: "Gender stereotype in traits", suggestion: "focus on job-related skills", severity: "medium", bias: "Tone" },
   ]
 
   const issues = []
   const seen = new Set()
 
+  console.log("🔍 Fallback: Starting regex matching on", text.length, "chars")
+  
   for (const rule of fallbackRules) {
     const matches = text.match(rule.regex) || []
+    if (matches.length > 0) {
+      console.log(`  ✓ "${rule.regex}" matched:`, matches.join(", "))
+    }
     for (const match of matches) {
       const key = `${match.toLowerCase()}::${rule.suggestion.toLowerCase()}`
       if (seen.has(key)) continue
@@ -140,6 +156,7 @@ function fallbackIssuesFromText(text) {
     }
   }
 
+  console.log("🔍 Fallback: Found", issues.length, "total issues")
   return issues
 }
 
@@ -206,7 +223,7 @@ app.post("/analyze", async (req, res) => {
     console.log("📝 Analyzing text:", text.substring(0, 50) + "...")
     console.log("🎯 Context:", context)
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" })
     const prompt = buildPrompt(text, context)
     
     try {
