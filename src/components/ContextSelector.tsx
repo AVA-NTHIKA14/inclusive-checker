@@ -54,15 +54,16 @@ export default function ContextSelector({
       {CONTEXTS.map(c => (
         <button
           key={c.key}
-          onClick={() => setContext(c.key)}
+          onClick={() => {
+            console.log("Setting context to:", c.key)
+            setContext(c.key)
+          }}
           aria-pressed={context === c.key}
-          className={`px-3 py-2 rounded text-sm font-semibold transition
-            ${
-              context === c.key
-                ? "bg-yellow-400 text-black"
-                : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-            }
-          `}
+          className={`px-4 py-2 rounded text-sm font-semibold transition cursor-pointer ${
+            context === c.key
+              ? "bg-yellow-400 text-black shadow-lg"
+              : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+          }`}
         >
           <div>{c.label}</div>
           <div className="text-[10px] font-normal opacity-70">

@@ -13,9 +13,20 @@ export default function AnalysisPanel({
   issues,
   loading,
 }: Props) {
+  const escapeRegex = (value: string) =>
+    value.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")
+
+  const buildFoundRegex = (found: string) => {
+    const escaped = escapeRegex(found.trim())
+    const isWordLike = /^[\w\s-]+$/.test(found)
+    return isWordLike
+      ? new RegExp(`\\b${escaped}\\b`, "gi")
+      : new RegExp(escaped, "gi")
+  }
+
   // Replace a single word/phrase
   const handleSwap = (found: string, suggestion: string) => {
-    const regex = new RegExp(`\\b${found}\\b`, "gi")
+    const regex = buildFoundRegex(found)
     setText(text.replace(regex, suggestion))
   }
 
@@ -23,8 +34,13 @@ export default function AnalysisPanel({
   const handleApplyAll = () => {
     let updatedText = text
 
-    issues.forEach(issue => {
-      const regex = new RegExp(`\\b${issue.found}\\b`, "gi")
+    // Replace longer matches first to avoid partial-overlap replacements.
+    const sortedIssues = [...issues].sort(
+      (a, b) => b.found.length - a.found.length
+    )
+
+    sortedIssues.forEach(issue => {
+      const regex = buildFoundRegex(issue.found)
       updatedText = updatedText.replace(regex, issue.suggestion)
     })
 

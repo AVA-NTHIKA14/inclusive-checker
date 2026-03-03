@@ -96,9 +96,19 @@ function fallbackIssuesFromText(text) {
 }
 
 function buildPrompt(text, context) {
+  const contextDescriptions = {
+    general: "General/any content - use standard inclusive language guidelines",
+    job: "Job posting/hiring context - avoid gendered language in roles and requirements",
+    email: "Professional email communication - maintain inclusive and respectful tone",
+    slack: "Informal team chat/Slack message - still avoid biased or exclusionary language",
+    policy: "Official policy document - must be formal and completely inclusive",
+  }
+  
+  const contextDesc = contextDescriptions[context] || contextDescriptions.general
+  
   return `You are an expert inclusive language checker. Your job is to identify ALL non-inclusive language in the text and provide SINGLE, SPECIFIC replacements.
 
-Context (audience/setting): ${context}
+Context: ${contextDesc}
 
 Text to analyze:
 "${text}"
