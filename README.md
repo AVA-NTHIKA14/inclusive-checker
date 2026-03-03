@@ -4,9 +4,9 @@ An AI-powered web application for detecting non-inclusive language and suggestin
 
 **Developed by:** Avanthika K S  
 **Institution:** Government Engineering College Palakkad
-Hosted Project Link
 
-[Add your deployed project link here]
+Hosted Project Link
+https://inclusive-checker-b3lh.vercel.app/
 
 **Project Description**
 

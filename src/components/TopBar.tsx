@@ -11,9 +11,16 @@ export default function TopBar({ active, setActive }: Props) {
       className="h-14 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-6"
       role="banner"
     >
-      {/* LEFT: App Title */}
-      <div className="font-bold tracking-wide text-white">
-        INCLUSIVE CHECKER
+      {/* LEFT: Logo and App Title */}
+      <div className="flex items-center gap-3">
+        <img 
+          src="/logo.png" 
+          alt="Inclusive Checker Logo" 
+          className="h-10 w-10"
+        />
+        <div className="font-bold tracking-wide text-white">
+          INCLUSIVE CHECKER
+        </div>
       </div>
 
       {/* RIGHT: Navigation */}

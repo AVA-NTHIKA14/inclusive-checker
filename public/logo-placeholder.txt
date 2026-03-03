@@ -1,0 +1,12 @@
+IMPORTANT: Copy your logo image to this location:
+File: public/logo.png
+
+The app is now configured to display the logo from /logo.png in the public folder.
+Make sure the logo file is named exactly "logo.png" for it to appear correctly.
+
+Your logo should be:
+- PNG format (recommended)
+- Ideally square (e.g., 256x256px or 512x512px)
+- With transparent background for best appearance
+
+After placing the logo.png file in the public/ folder, rebuild the app with: npm run build
