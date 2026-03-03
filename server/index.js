@@ -43,8 +43,13 @@ function normalizeBias(value) {
 
 function fallbackIssuesFromText(text) {
   const fallbackRules = [
-    // Gendered pronouns
-    { regex: /\b(his|her|him|hers)\b/gi, label: "Gendered pronoun", suggestion: "they/their/them", severity: "medium", bias: "Gender Bias" },
+    // Gendered pronouns - specific replacements
+    { regex: /\bhis\b/gi, label: "Gendered pronoun", suggestion: "their", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bher\b(?=\s+(?:name|work|job|report|idea|team))/gi, label: "Gendered pronoun (possessive)", suggestion: "their", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bhim\b/gi, label: "Gendered pronoun", suggestion: "them", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bhe\b/gi, label: "Gendered pronoun", suggestion: "they", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bshe\b/gi, label: "Gendered pronoun", suggestion: "they", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bhers\b/gi, label: "Gendered pronoun", suggestion: "theirs", severity: "medium", bias: "Gender Bias" },
     // Gendered job titles
     { regex: /\bchairman\b/gi, label: "Gendered job title", suggestion: "chairperson", severity: "high", bias: "Gender Bias" },
     { regex: /\bpoliceman\b/gi, label: "Gendered job title", suggestion: "police officer", severity: "high", bias: "Gender Bias" },
@@ -52,7 +57,6 @@ function fallbackIssuesFromText(text) {
     { regex: /\bstewardess\b/gi, label: "Gendered job title", suggestion: "flight attendant", severity: "high", bias: "Gender Bias" },
     { regex: /\bmailman\b/gi, label: "Gendered job title", suggestion: "postal worker", severity: "high", bias: "Gender Bias" },
     { regex: /\bsalesman\b/gi, label: "Gendered job title", suggestion: "salesperson", severity: "high", bias: "Gender Bias" },
-    { regex: /\b(businessman|businesswoman)\b/gi, label: "Gendered job title", suggestion: "business professional", severity: "high", bias: "Gender Bias" },
     { regex: /\bspokesman\b/gi, label: "Gendered job title", suggestion: "spokesperson", severity: "high", bias: "Gender Bias" },
     { regex: /\bcameraman\b/gi, label: "Gendered job title", suggestion: "camera operator", severity: "high", bias: "Gender Bias" },
     // Gendered terms
@@ -92,7 +96,7 @@ function fallbackIssuesFromText(text) {
 }
 
 function buildPrompt(text, context) {
-  return `You are an expert inclusive language checker. Your job is to identify ALL non-inclusive language in the text regardless of type.
+  return `You are an expert inclusive language checker. Your job is to identify ALL non-inclusive language in the text and provide SINGLE, SPECIFIC replacements.
 
 Context (audience/setting): ${context}
 
@@ -101,27 +105,28 @@ Text to analyze:
 
 Your task:
 1. Scan the ENTIRE text for non-inclusive language including but not limited to:
-   - Gendered language (he/she/his/her → they/their, chairman → chairperson, fireman → firefighter)
-   - Ableist language (deaf to, blind to, dumb, retard, crippled, lame)
-   - Age bias (elderly, seniors, old people → specific age groups or "older adults")
-   - Assumptions about abilities or backgrounds
-   - Tone issues (words that could be disrespectful or marginalizing)
+   - Gendered pronouns: "he" → "they", "she" → "they", "him" → "them", "her" (object) → "them", "his" → "their", "hers" → "theirs"
+   - Gendered job titles: "chairman" → "chairperson", "policeman" → "police officer", "fireman" → "firefighter", "stewardess" → "flight attendant", etc.
+   - Gendered terms: "manpower" → "workforce", "mankind" → "humanity", "man-made" → "human-made"
+   - Ableist language: "retard", "dumb", "lame", "blind to", "deaf to", "crippled", "suffers from"
+   - Age bias and stereotypes
    - Cultural insensitivity
-   - Any other exclusionary or discriminatory language
+   - Tone issues
 
-2. For EACH issue found:
-   - Provide the EXACT phrase from the text
-   - Give ONE definitive inclusive suggestion (no alternatives, no multiple choices, no "or", no slash)
-   - Mark severity as "high" (problematic) or "medium" (could be improved)
-   - Categorize the bias type
+2. For EACH issue found, provide ONLY ONE specific suggestion:
+   - NO alternatives (no "or", "and/or", "/" separators)
+   - NO multiple options
+   - ONLY the single best inclusive word
+   - Example: for "his" → suggest ONLY "their" (not "their/them")
+   - Example: for "he" → suggest ONLY "they"
 
 3. Return ONLY valid JSON, no explanations:
 {
   "issues": [
     {
-      "label": "Clear description of the issue",
+      "label": "Clear description",
       "found": "exact phrase from text",
-      "suggestion": "single inclusive alternative",
+      "suggestion": "single word only",
       "severity": "high" or "medium",
       "bias": "Gender Bias" or "Age Bias" or "Disability Bias" or "Cultural Bias" or "Tone"
     }
