@@ -11,15 +11,22 @@ import type { Issue } from "./types/issue"
 type Tab = "editor" | "library" | "insights"
 
 // Client-side fallback detection for common non-inclusive terms
-const BIASED_TERMS = [
+type BiasedTerm = {
+  words: string[]
+  suggestion: string
+  severity: "high" | "medium"
+  bias: "Gender Bias" | "Cultural Bias" | "Age Bias" | "Disability Bias" | "Tone"
+}
+
+const BIASED_TERMS: BiasedTerm[] = [
   // Gendered pronouns
-  { words: ["his", "her", "him", "hers"], suggestion: "they/their/them", severity: "medium" as const, bias: "Gender Bias" as const },
+  { words: ["his", "her", "him", "hers"], suggestion: "they/their/them", severity: "medium", bias: "Gender Bias" },
   // Gendered job titles
-  { words: ["chairman", "policeman", "fireman", "stewardess", "mailman", "salesman", "businessman", "spokesman", "cameraman"], suggestion: "use gender-neutral version (e.g., chair, police officer)", severity: "high" as const, bias: "Gender Bias" as const },
+  { words: ["chairman", "policeman", "fireman", "stewardess", "mailman", "salesman", "businessman", "spokesman", "cameraman"], suggestion: "use gender-neutral version (e.g., chair, police officer)", severity: "high", bias: "Gender Bias" },
   // Gendered manpower terms
-  { words: ["manpower", "mankind", "man-made"], suggestion: "workforce/humanity/human-made", severity: "high" as const, bias: "Gender Bias" as const },
+  { words: ["manpower", "mankind", "man-made"], suggestion: "workforce/humanity/human-made", severity: "high", bias: "Gender Bias" },
   // Ableist language
-  { words: ["retard", "dumb", "lame"], suggestion: "use respectful, person-first language", severity: "high" as const, bias: "Disability Bias" as const },
+  { words: ["retard", "dumb", "lame"], suggestion: "use respectful, person-first language", severity: "high", bias: "Disability Bias" },
 ]
 
 // Helper function to find word boundaries correctly
@@ -51,7 +58,7 @@ export default function App() {
         const matches = findWordMatches(textToCheck, word)
         matches.forEach(matchedText => {
           detectedIssues.push({
-            label: `Non-inclusive ${bias.toLowerCase()}`,
+            label: bias,
             found: matchedText,
             suggestion,
             severity,

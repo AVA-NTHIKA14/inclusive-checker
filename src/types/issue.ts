@@ -3,5 +3,5 @@ export type Issue = {
   found: string
   suggestion: string
   severity: "high" | "medium"
-  bias: "Gender Bias" | "Cultural Bias" | "Age Bias" | "Tone"
+  bias: "Gender Bias" | "Cultural Bias" | "Age Bias" | "Disability Bias" | "Tone"
 }
