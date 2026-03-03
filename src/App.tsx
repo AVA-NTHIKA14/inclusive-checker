@@ -10,30 +10,8 @@ import type { Issue } from "./types/issue"
 
 type Tab = "editor" | "library" | "insights"
 
-// Client-side fallback detection for common non-inclusive terms
-const BIASED_TERMS = [
-  // Gendered pronouns
-  { words: ["his", "her", "him", "hers"], suggestion: "they/their/them", severity: "medium" as const, bias: "Gender Bias" as const },
-  // Gendered job titles
-  { words: ["chairman", "policeman", "fireman", "stewardess", "mailman", "salesman", "businessman", "spokesman", "cameraman"], suggestion: "use gender-neutral version (e.g., chair, police officer)", severity: "high" as const, bias: "Gender Bias" as const },
-  // Gendered manpower terms
-  { words: ["manpower", "mankind", "man-made"], suggestion: "workforce/humanity/human-made", severity: "high" as const, bias: "Gender Bias" as const },
-  // Ableist language
-  { words: ["retard", "dumb", "lame"], suggestion: "use respectful, person-first language", severity: "high" as const, bias: "Disability Bias" as const },
-]
-
-// Helper function to find word boundaries correctly
-const findWordMatches = (text: string, word: string): string[] => {
-  const matches: string[] = []
-  // Create a regex that matches whole words, case-insensitive
-  const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const regex = new RegExp(`\\b${escapedWord}\\b`, 'gi')
-  let match
-  while ((match = regex.exec(text)) !== null) {
-    matches.push(match[0]) // Push the actual matched text
-  }
-  return matches
-}
+// NOTE: Using Gemini API for universal dynamic detection
+// No hardcoded terms - all analysis is done by AI
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("editor")
@@ -42,59 +20,19 @@ export default function App() {
   const [issues, setIssues] = useState<Issue[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Client-side fallback detection
-  const detectClientSide = (textToCheck: string): Issue[] => {
-    const detectedIssues: Issue[] = []
-    
-    BIASED_TERMS.forEach(({ words, suggestion, severity, bias }) => {
-      words.forEach(word => {
-        const matches = findWordMatches(textToCheck, word)
-        matches.forEach(matchedText => {
-          detectedIssues.push({
-            label: bias,
-            found: matchedText,
-            suggestion,
-            severity,
-            bias,
-          })
-        })
-      })
-    })
-    
-    // Remove duplicates while preserving order
-    const uniqueIssues = Array.from(new Map(
-      detectedIssues.map(issue => [`${issue.found}-${issue.bias}`, issue])
-    ).values())
-    
-    console.log("Detected unique issues:", uniqueIssues)
-    return uniqueIssues
-  }
-
   const handleVerify = async () => {
     if (!text.trim()) return
     setLoading(true)
     try {
-      let issues: Issue[] = []
+      const result = await analyzeWithGemini(text, context)
+      console.log("Analysis result:", result)
       
-      // Try server-side analysis first
-      try {
-        const result = await analyzeWithGemini(text, context)
-        console.log("Analysis result:", result)
-        
-        if (result && result.issues && result.issues.length > 0) {
-          issues = result.issues
-          console.log("Using server-side detection:", issues)
-        } else {
-          console.log("Server returned no issues, using fallback")
-          issues = detectClientSide(text)
-        }
-      } catch (serverError) {
-        console.error("Server error, using client-side fallback:", serverError)
-        issues = detectClientSide(text)
-      }
-      
-      setIssues(issues)
-      console.log("Final issues set:", issues)
+      const detectedIssues: Issue[] = (result && result.issues) ? result.issues : []
+      setIssues(detectedIssues)
+      console.log("Issues detected:", detectedIssues.length)
+    } catch (error) {
+      console.error("Analysis failed:", error)
+      setIssues([])
     } finally {
       setLoading(false)
     }

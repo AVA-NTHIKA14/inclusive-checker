@@ -24,43 +24,43 @@ const inclusiveTerms = [
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 function buildPrompt(text, context) {
-  return `You are a strict inclusive language checker. Your job is to identify ALL non-inclusive language in the text.
+  return `You are an expert inclusive language checker. Your job is to identify ALL non-inclusive language in the text regardless of type.
 
-MANDATORY CHECKS - Flag these EVERY time they appear:
-1. GENDERED PRONOUNS - Flag: "he", "him", "his", "she", "her", "hers" (singular) → Suggest: "they", "them", "their"
-2. GENDERED JOB TITLES - Flag: "Chairman", "Policeman", "Fireman", "Stewardess", "Mailman", "Salesman", "Businessman", "Spokesman", "Housewife", "Cameraman" → Suggest gender-neutral version
-3. GENDERED TERMS - Flag: "manpower", "mankind", "girl/boy" (for adults), "man-made" → Suggest inclusive alternative
-4. ABLEIST LANGUAGE - Flag: "retard", "dumb", "blind to", "deaf to", "crippled", "suffers from", "confined to wheelchair"
-5. AGE BIAS - Flag: "old", "young", "elderly", "seniors" (be specific) → Suggest specific age ranges or "older adults"
-6. ABILITY ASSUMPTION - Flag: "disabled person", "sufferer" → Suggest "person with a disability", "person living with"
+Context (audience/setting): ${context}
 
-CONTEXT: ${context}
-
-TEXT TO ANALYZE:
+Text to analyze:
 "${text}"
 
-STRICT RULES:
-- Return ONLY valid JSON, no explanations
-- Find and flag EVERY instance of non-inclusive language
-- MUST check for pronouns like "his", "her", "he", "she" and suggest "they/their"
-- Include the exact phrase as it appears in the text
-- severity must be "high" or "medium"
-- bias must be one of: "Gender Bias", "Age Bias", "Disability Bias", "Cultural Bias", "Tone"
+Your task:
+1. Scan the ENTIRE text for non-inclusive language including but not limited to:
+   - Gendered language (he/she/his/her → they/their, chairman → chairperson, fireman → firefighter)
+   - Ableist language (deaf to, blind to, dumb, retard, crippled, lame)
+   - Age bias (elderly, seniors, old people → specific age groups or "older adults")
+   - Assumptions about abilities or backgrounds
+   - Tone issues (words that could be disrespectful or marginalizing)
+   - Cultural insensitivity
+   - Any other exclusionary or discriminatory language
 
-Return this JSON format EXACTLY:
+2. For EACH issue found:
+   - Provide the EXACT phrase from the text
+   - Give ONE definitive inclusive suggestion (no alternatives)
+   - Mark severity as "high" (problematic) or "medium" (could be improved)
+   - Categorize the bias type
+
+3. Return ONLY valid JSON, no explanations:
 {
   "issues": [
     {
-      "label": "bias type",
+      "label": "Clear description of the issue",
       "found": "exact phrase from text",
-      "suggestion": "inclusive alternative",
-      "severity": "high",
-      "bias": "Gender Bias" | "Age Bias" | "Disability Bias" | "Cultural Bias" | "Tone"
+      "suggestion": "single inclusive alternative",
+      "severity": "high" or "medium",
+      "bias": "Gender Bias" or "Age Bias" or "Disability Bias" or "Cultural Bias" or "Tone"
     }
   ]
 }
 
-If text has no issues, return: {"issues": []}
+If no issues found, return: {"issues": []}
 `
 }
 
