@@ -43,34 +43,82 @@ function normalizeBias(value) {
 
 function fallbackIssuesFromText(text) {
   const fallbackRules = [
-    // Gendered pronouns - specific replacements
+    // ===== GENDERED PRONOUNS =====
     { regex: /\bhis\b/gi, label: "Gendered pronoun", suggestion: "their", severity: "medium", bias: "Gender Bias" },
-    { regex: /\bher\b(?=\s+(?:name|work|job|report|idea|team))/gi, label: "Gendered pronoun (possessive)", suggestion: "their", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bher\b(?=\s+(?:name|work|job|report|idea|team|plan|opinion))/gi, label: "Gendered pronoun (possessive)", suggestion: "their", severity: "medium", bias: "Gender Bias" },
     { regex: /\bhim\b/gi, label: "Gendered pronoun", suggestion: "them", severity: "medium", bias: "Gender Bias" },
     { regex: /\bhe\b/gi, label: "Gendered pronoun", suggestion: "they", severity: "medium", bias: "Gender Bias" },
     { regex: /\bshe\b/gi, label: "Gendered pronoun", suggestion: "they", severity: "medium", bias: "Gender Bias" },
     { regex: /\bhers\b/gi, label: "Gendered pronoun", suggestion: "theirs", severity: "medium", bias: "Gender Bias" },
-    // Gendered job titles
+    
+    // ===== GENDERED JOB TITLES =====
     { regex: /\bchairman\b/gi, label: "Gendered job title", suggestion: "chairperson", severity: "high", bias: "Gender Bias" },
+    { regex: /\bchairwoman\b/gi, label: "Gendered job title", suggestion: "chairperson", severity: "high", bias: "Gender Bias" },
     { regex: /\bpoliceman\b/gi, label: "Gendered job title", suggestion: "police officer", severity: "high", bias: "Gender Bias" },
+    { regex: /\bpolicewoman\b/gi, label: "Gendered job title", suggestion: "police officer", severity: "high", bias: "Gender Bias" },
     { regex: /\bfireman\b/gi, label: "Gendered job title", suggestion: "firefighter", severity: "high", bias: "Gender Bias" },
+    { regex: /\bfirewoman\b/gi, label: "Gendered job title", suggestion: "firefighter", severity: "high", bias: "Gender Bias" },
     { regex: /\bstewardess\b/gi, label: "Gendered job title", suggestion: "flight attendant", severity: "high", bias: "Gender Bias" },
+    { regex: /\bsteward\b/gi, label: "Gendered job title", suggestion: "flight attendant", severity: "high", bias: "Gender Bias" },
     { regex: /\bmailman\b/gi, label: "Gendered job title", suggestion: "postal worker", severity: "high", bias: "Gender Bias" },
+    { regex: /\bmailwoman\b/gi, label: "Gendered job title", suggestion: "postal worker", severity: "high", bias: "Gender Bias" },
     { regex: /\bsalesman\b/gi, label: "Gendered job title", suggestion: "salesperson", severity: "high", bias: "Gender Bias" },
+    { regex: /\bsaleswoman\b/gi, label: "Gendered job title", suggestion: "salesperson", severity: "high", bias: "Gender Bias" },
     { regex: /\bspokesman\b/gi, label: "Gendered job title", suggestion: "spokesperson", severity: "high", bias: "Gender Bias" },
+    { regex: /\bspokewoman\b/gi, label: "Gendered job title", suggestion: "spokesperson", severity: "high", bias: "Gender Bias" },
     { regex: /\bcameraman\b/gi, label: "Gendered job title", suggestion: "camera operator", severity: "high", bias: "Gender Bias" },
-    // Gendered terms
+    { regex: /\bcamerawoman\b/gi, label: "Gendered job title", suggestion: "camera operator", severity: "high", bias: "Gender Bias" },
+    { regex: /\blineman\b/gi, label: "Gendered job title", suggestion: "line technician", severity: "high", bias: "Gender Bias" },
+    { regex: /\brepairman\b/gi, label: "Gendered job title", suggestion: "repair technician", severity: "high", bias: "Gender Bias" },
+    { regex: /\bassistant\s+manager\b/gi, label: "Gendered job title", suggestion: "assistant manager", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bwaiter\b/gi, label: "Gendered job title", suggestion: "server", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bwaitress\b/gi, label: "Gendered job title", suggestion: "server", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bactор\b/gi, label: "Gendered job title", suggestion: "actor", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bactress\b/gi, label: "Gendered job title", suggestion: "actor", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bhost\b/gi, label: "Gendered job title", suggestion: "host", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bhostess\b/gi, label: "Gendered job title", suggestion: "host", severity: "medium", bias: "Gender Bias" },
+    
+    // ===== GENDERED TERMS =====
     { regex: /\bmanpower\b/gi, label: "Gendered terminology", suggestion: "workforce", severity: "high", bias: "Gender Bias" },
     { regex: /\bmankind\b/gi, label: "Gendered terminology", suggestion: "humanity", severity: "high", bias: "Gender Bias" },
     { regex: /\bman-made\b/gi, label: "Gendered terminology", suggestion: "human-made", severity: "high", bias: "Gender Bias" },
     { regex: /\bguys\b/gi, label: "Gendered group reference", suggestion: "everyone", severity: "medium", bias: "Gender Bias" },
-    // Ableist language
+    { regex: /\bgirls\b/gi, label: "Gendered group reference", suggestion: "people", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bboys\b/gi, label: "Gendered group reference", suggestion: "people", severity: "medium", bias: "Gender Bias" },
+    { regex: /\blads\b/gi, label: "Gendered group reference", suggestion: "people", severity: "medium", bias: "Gender Bias" },
+    { regex: /\bwomankind\b/gi, label: "Gendered terminology", suggestion: "humanity", severity: "high", bias: "Gender Bias" },
+    
+    // ===== ABLEIST LANGUAGE =====
     { regex: /\bretard\b/gi, label: "Offensive ableist term", suggestion: "person with intellectual disability", severity: "high", bias: "Disability Bias" },
     { regex: /\bdumb\b/gi, label: "Ableist language", suggestion: "ineffective", severity: "medium", bias: "Disability Bias" },
     { regex: /\blame\b/gi, label: "Ableist language", suggestion: "ineffective", severity: "medium", bias: "Disability Bias" },
     { regex: /\bblind\s+to\b/gi, label: "Ableist metaphor", suggestion: "unaware of", severity: "medium", bias: "Disability Bias" },
     { regex: /\bdeaf\s+to\b/gi, label: "Ableist metaphor", suggestion: "ignoring", severity: "medium", bias: "Disability Bias" },
     { regex: /\bcrippled\b/gi, label: "Outdated term", suggestion: "person with mobility disability", severity: "high", bias: "Disability Bias" },
+    { regex: /\bparalyzed\b/gi, label: "Ableist term", suggestion: "unable to move forward", severity: "medium", bias: "Disability Bias" },
+    { regex: /\bsurvivors?\s+of\s+(?:abuse|assault)/gi, label: "Stigmatizing term", suggestion: "people affected by/person who experienced", severity: "medium", bias: "Disability Bias" },
+    { regex: /\bsuffers?\s+from\s+(?:autism|ADHD|epilepsy|diabetes)/gi, label: "Stigmatizing language", suggestion: "has/people with", severity: "medium", bias: "Disability Bias" },
+    { regex: /\bconfined\s+to\s+(?:wheelchair|bed)/gi, label: "Stigmatizing language", suggestion: "uses a wheelchair/in bed", severity: "high", bias: "Disability Bias" },
+    { regex: /\bwheel-?chair\s+bound\b/gi, label: "Stigmatizing language", suggestion: "wheelchair user", severity: "high", bias: "Disability Bias" },
+    
+    // ===== AGE BIAS =====
+    { regex: /\bold\s+(?:person|people|woman|man|age)\b/gi, label: "Age bias - vague term", suggestion: "older adults or specific age range", severity: "medium", bias: "Age Bias" },
+    { regex: /\b(?:elderly|seniors?|golden years?)\b/gi, label: "Age stereotyping", suggestion: "older adults or specific age", severity: "medium", bias: "Age Bias" },
+    { regex: /\byoung\s+(?:person|people|woman|man)\b/gi, label: "Age bias - vague term", suggestion: "younger adults or specific age", severity: "medium", bias: "Age Bias" },
+    { regex: /\bgeneration\s+(?:x|y|z|millennial|boomer)\b/gi, label: "Generational stereotyping", suggestion: "people born in [specific years]", severity: "medium", bias: "Age Bias" },
+    
+    // ===== CULTURAL/RELIGIOUS BIAS =====
+    { regex: /\bforeign\s+(?:workers?|nationals?)\b/gi, label: "Othering language", suggestion: "international workers/workers from [country]", severity: "medium", bias: "Cultural Bias" },
+    { regex: /\bexotic\b/gi, label: "Othering language (food/culture)", suggestion: "different or unfamiliar", severity: "medium", bias: "Cultural Bias" },
+    { regex: /\boriental\b/gi, label: "Outdated term", suggestion: "East Asian or specific country", severity: "high", bias: "Cultural Bias" },
+    { regex: /\bChinese\s+(?:whisper|whispers)\b/gi, label: "Stigmatizing term", suggestion: "pass along message", severity: "medium", bias: "Cultural Bias" },
+    { regex: /\bEskimo\b/gi, label: "Outdated/offensive term", suggestion: "Inuit or Inupiat", severity: "high", bias: "Cultural Bias" },
+    { regex: /\bIndian(?:\s+giver)?\b/gi, label: "Offensive/outdated term", suggestion: "Indigenous/Native American", severity: "high", bias: "Cultural Bias" },
+    
+    // ===== TONE/RESPECTFULNESS =====
+    { regex: /\bbeast\b/gi, label: "Dehumanizing language", suggestion: "hardworking or dedicated person", severity: "medium", bias: "Tone" },
+    { regex: /\bgangsta?\b/gi, label: "Stereotyping slang", suggestion: "use professional terminology", severity: "medium", bias: "Tone" },
+    { regex: /\bhhh|lolll?|smh\b/gi, label: "Unprofessional tone", suggestion: "use professional language", severity: "low", bias: "Tone" },
   ]
 
   const issues = []
