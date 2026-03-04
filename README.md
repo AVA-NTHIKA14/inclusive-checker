@@ -1,4 +1,4 @@
-# Inclusive Language Checker
+﻿# Inclusive Language Checker
 
 An AI-powered web application for detecting non-inclusive language and suggesting inclusive alternatives.
 
@@ -21,8 +21,6 @@ Many written materials unintentionally include gender bias, ableist terms, or ex
 The project uses AI-powered text analysis to detect non-inclusive language and provide context-aware, inclusive alternatives. Users can review suggestions, replace individual terms, or apply all recommendations at once for cleaner, more inclusive text.
 
 **Technical Details**
-Technologies / Components Used
-For Software
 
 **Languages used**: TypeScript, JavaScript
 
@@ -88,3 +86,14 @@ AI integration and testing
 License
 
 This project is licensed under the MIT License.
+
+
+---
+
+## Documentation
+
+- [Features](docs/FEATURES.md)
+- [Quick Start](docs/QUICK_START.md)
+- [Setup](docs/SETUP.md)
+- [Technical](docs/TECHNICAL.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
