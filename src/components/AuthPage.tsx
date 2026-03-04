@@ -1,9 +1,11 @@
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
   GoogleAuthProvider,
+  getRedirectResult,
   type User,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithRedirect,
   signInWithPopup,
   updateProfile,
 } from "firebase/auth"
@@ -24,10 +26,14 @@ function toAuthUser(user: Pick<User, "uid" | "email" | "displayName">): AuthUser
   }
 }
 
-function getGoogleAuthErrorMessage(error: unknown) {
-  const code = typeof error === "object" && error && "code" in error
+function getAuthErrorCode(error: unknown) {
+  return typeof error === "object" && error && "code" in error
     ? String((error as { code?: string }).code || "")
     : ""
+}
+
+function getGoogleAuthErrorMessage(error: unknown) {
+  const code = getAuthErrorCode(error)
 
   if (code === "auth/popup-closed-by-user") {
     return "Google sign-in was cancelled."
@@ -47,6 +53,10 @@ function getGoogleAuthErrorMessage(error: unknown) {
 
   if (code === "auth/network-request-failed") {
     return "Network error during Google sign-in. Check internet and try again."
+  }
+
+  if (code) {
+    return `Google sign-in failed (${code}). Please try again.`
   }
 
   return "Google sign-in failed. Please try again."
@@ -74,12 +84,34 @@ export default function AuthPage({ onAuthSuccess }: Props) {
     resetForm()
   }
 
-  const completeAuth = async (user: User) => {
+  const completeAuth = useCallback(async (user: User) => {
     const authUser = toAuthUser(user)
     saveSession(authUser)
     onAuthSuccess(authUser)
     await trackUserActivity(user)
-  }
+  }, [onAuthSuccess])
+
+  useEffect(() => {
+    let active = true
+
+    const completeRedirectAuth = async () => {
+      try {
+        const cred = await getRedirectResult(auth)
+        if (active && cred?.user) {
+          await completeAuth(cred.user)
+        }
+      } catch (error) {
+        if (active) {
+          setError(getGoogleAuthErrorMessage(error))
+        }
+      }
+    }
+
+    void completeRedirectAuth()
+    return () => {
+      active = false
+    }
+  }, [completeAuth])
 
   const handleSignIn = async () => {
     const normalizedEmail = email.trim().toLowerCase()
@@ -137,13 +169,27 @@ export default function AuthPage({ onAuthSuccess }: Props) {
   const handleGoogleSignIn = async () => {
     setBusy(true)
     setError("")
+    const provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: "select_account" })
 
     try {
-      const provider = new GoogleAuthProvider()
-      provider.setCustomParameters({ prompt: "select_account" })
       const cred = await signInWithPopup(auth, provider)
       await completeAuth(cred.user)
     } catch (error) {
+      const code = getAuthErrorCode(error)
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/operation-not-supported-in-this-environment"
+      ) {
+        try {
+          await signInWithRedirect(auth, provider)
+          return
+        } catch (redirectError) {
+          setError(getGoogleAuthErrorMessage(redirectError))
+          return
+        }
+      }
+
       setError(getGoogleAuthErrorMessage(error))
     } finally {
       setBusy(false)
