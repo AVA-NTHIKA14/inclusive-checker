@@ -24,6 +24,34 @@ function toAuthUser(user: Pick<User, "uid" | "email" | "displayName">): AuthUser
   }
 }
 
+function getGoogleAuthErrorMessage(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error
+    ? String((error as { code?: string }).code || "")
+    : ""
+
+  if (code === "auth/popup-closed-by-user") {
+    return "Google sign-in was cancelled."
+  }
+
+  if (code === "auth/popup-blocked") {
+    return "Popup blocked by browser. Allow popups for this site and try again."
+  }
+
+  if (code === "auth/unauthorized-domain") {
+    return "This domain is not authorized in Firebase. Add it in Authentication -> Settings -> Authorized domains."
+  }
+
+  if (code === "auth/operation-not-allowed") {
+    return "Google sign-in is disabled in Firebase. Enable Google provider in Authentication -> Sign-in method."
+  }
+
+  if (code === "auth/network-request-failed") {
+    return "Network error during Google sign-in. Check internet and try again."
+  }
+
+  return "Google sign-in failed. Please try again."
+}
+
 export default function AuthPage({ onAuthSuccess }: Props) {
   const [mode, setMode] = useState<"signin" | "signup">("signin")
   const [name, setName] = useState("")
@@ -112,10 +140,11 @@ export default function AuthPage({ onAuthSuccess }: Props) {
 
     try {
       const provider = new GoogleAuthProvider()
+      provider.setCustomParameters({ prompt: "select_account" })
       const cred = await signInWithPopup(auth, provider)
       await completeAuth(cred.user)
-    } catch {
-      setError("Google sign-in was cancelled or failed.")
+    } catch (error) {
+      setError(getGoogleAuthErrorMessage(error))
     } finally {
       setBusy(false)
     }
